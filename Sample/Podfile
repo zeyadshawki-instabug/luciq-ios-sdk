@@ -16,3 +16,11 @@ target 'LuciqUIKitDemo' do
   pod 'Luciq'
 
 end
+
+target 'NewSampleLuciqSwiftUI' do
+  use_frameworks!
+
+  # Pods for LuciqUIKitDemo
+  pod 'Luciq'
+
+end

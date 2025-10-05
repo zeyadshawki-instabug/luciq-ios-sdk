@@ -13,19 +13,11 @@ struct ContentView: View {
     
     init() {
         Luciq.sdkDebugLogsLevel = .verbose
-        // Start timing measurement
-        SystemMonitoringService.shared.startTiming()
-        
-        // Initialize Luciq SDK with centralized configuration
         Luciq.start(withToken: Configuration.appToken, invocationEvents: [.shake, .floatingButton])
-        
-        // End timing measurement
-        SystemMonitoringService.shared.endTiming()
     }
     
     var body: some View {
         TabView {
-          
             // Info Tab
             InfoPage()
                 .tabItem {
@@ -45,10 +37,6 @@ struct ContentView: View {
                     Image(systemName: "star")
                     Text("Features")
                 }
-            
-         
-            
-           
         }
         .environmentObject(monitoringService)
     }

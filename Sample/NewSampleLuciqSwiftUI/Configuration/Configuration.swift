@@ -25,17 +25,17 @@ struct Configuration {
     
     /// The main Luciq SDK app token
     /// Replace this with your actual app token from the Luciq dashboard
-    static let appToken = "d824b0efb5573e97ac7c03fb03d2d0a3"
+    static var appToken = "d824b0efb5573e97ac7c03fb03d2d0a3"
     
     // MARK: - Survey Tokens
     
     /// NPS Survey token
     /// Replace with your actual NPS survey token from the Luciq dashboard
-    static let npsSurveyToken = ""
+    static var npsSurveyToken = ""
     
     /// Multi-Question Survey token
     /// Replace with your actual multi-question survey token from the Luciq dashboard
-    static let multiQuestionSurveyToken = ""
+    static var multiQuestionSurveyToken = ""
     
     // MARK: - SDK Configuration
     
@@ -43,7 +43,7 @@ struct Configuration {
     static let defaultUserID = "user123"
     
     /// Default user email for testing
-    static let defaultUserEmail = "user@example.com"
+    static let defaultUserEmail = "JohnDoe@example.com"
     
     /// Default user name for testing
     static let defaultUserName = "John Doe"
@@ -57,18 +57,4 @@ struct Configuration {
     
     /// Default tags for testing
     static let defaultTags = ["iOS", "SwiftUI", "Demo", "Testing"]
-    
-    // MARK: - URLs
-    
-    /// Luciq Dashboard URL
-    static let dashboardURL = "https://dashboard.luciq.ai"
-    
-    /// Luciq Documentation URL
-    static let documentationURL = "https://docs.luciq.ai/docs/ios-overview"
-    
-    /// Luciq Website URL
-    static let websiteURL = "https://luciq.ai"
-    
-    /// Support Email
-    static let supportEmail = "support@luciq.ai"
 }

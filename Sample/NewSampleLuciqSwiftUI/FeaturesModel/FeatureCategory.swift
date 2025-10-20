@@ -19,6 +19,7 @@ import Foundation
     case featureFlags = "Feature Flags"
     case Customization = "UI Customization"
     case tags = "Tags & Experiments"
+    case networking = "Network Testing"
     case testing = "Testing & Debugging"
     
     var id: String { self.rawValue }
@@ -34,6 +35,7 @@ import Foundation
         case .featureFlags: return "🏷️"
         case .Customization: return "🎨"
         case .tags: return "🧪"
+        case .networking: return "🌐"
         case .testing: return "🔧"
         }
     }

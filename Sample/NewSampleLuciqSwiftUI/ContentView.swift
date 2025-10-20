@@ -11,11 +11,6 @@ import LuciqSDK
 struct ContentView: View {
     @StateObject private var monitoringService = SystemMonitoringService.shared
     
-    init() {
-        Luciq.sdkDebugLogsLevel = .verbose
-        Luciq.start(withToken: Configuration.appToken, invocationEvents: [.shake, .floatingButton])
-    }
-    
     var body: some View {
         TabView {
             // Info Tab
@@ -24,13 +19,7 @@ struct ContentView: View {
                     Image(systemName: "info.circle")
                     Text("Info")
                 }
-            // Performance Tab
-            PerformancePage()
-                .tabItem {
-                    Image(systemName: "gauge")
-                    Text("Performance")
-                }
-            
+
             // Features Tab
             LuciqFeaturesPage()
                 .tabItem {

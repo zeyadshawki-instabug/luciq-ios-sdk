@@ -7,6 +7,7 @@
 
 import SwiftUI
 import LuciqSDK
+
  /*
  ## Documentation:
  For complete API documentation, visit: https://docs.luciq.ai/docs/ios-integration
@@ -21,6 +22,12 @@ struct LuciqFeaturesPage: View {
     @State private var changeAppTokenText = ""
     @State private var changeNpsTokenText = ""
     @State private var changeMultiQuestionTokenText = ""
+    
+    // MARK: - Network Testing State
+    @State private var networkStatus: String = "Ready"
+    @State private var showingNetworkAlert = false
+    @State private var downloadProgress: Double = 0.0
+    @State private var isDownloading = false
         
     // MARK: - Feature Data
     
@@ -193,6 +200,57 @@ struct LuciqFeaturesPage: View {
                 }
             ]),
             
+            // Network Testing
+            FeatureCategoryData(category: .networking, items: [
+                FeatureItem(title: "Enable Network Logging", description: "Enable network request logging", icon: "📡") {
+                    NetworkConfigurationManager.shared.enableNetworkLogging()
+                    networkStatus = "Network logging enabled"
+                },
+                FeatureItem(title: "Disable Network Logging", description: "Disable network request logging", icon: "🚫") {
+                    NetworkConfigurationManager.shared.disableNetworkLogging()
+                    networkStatus = "Network logging disabled"
+                },
+                FeatureItem(title: "Simple GET Request", description: "Test basic GET request", icon: "📥") {
+                    testSimpleGetRequest()
+                },
+                FeatureItem(title: "GET with Parameters", description: "Test GET request with query params", icon: "🔗") {
+                    testGetRequestWithParams()
+                },
+                FeatureItem(title: "Test Auto-Cancel Request", description: "Start download and auto-cancel after 1 sec", icon: "⏱️") {
+                    testAutoCancelRequest()
+                },
+                FeatureItem(title: "Multiple Requests", description: "Test sequential requests", icon: "🔄") {
+                    testMultipleRequests()
+                },
+                FeatureItem(title: "Test Failed Request", description: "Trigger 404 error", icon: "❌") {
+                    testFailedRequest()
+                },
+                FeatureItem(title: "Test Timeout", description: "Trigger request timeout", icon: "⏱️") {
+                    testTimeoutRequest()
+                },
+                FeatureItem(title: "Set Request Obfuscation", description: "Hide sensitive request data", icon: "🔒") {
+                    NetworkConfigurationManager.shared.setRequestObfuscation()
+                    networkStatus = "Request obfuscation enabled"
+                },
+                FeatureItem(title: "Set Response Obfuscation", description: "Hide sensitive response data", icon: "🛡️") {
+                    NetworkConfigurationManager.shared.setResponseObfuscation()
+                    networkStatus = "Response obfuscation enabled"
+                },
+                FeatureItem(title: "Set Network Filters", description: "Filter network logs", icon: "🔍") {
+                    NetworkConfigurationManager.shared.setNetworkFilters()
+                    networkStatus = "Network filters applied"
+                },
+                FeatureItem(title: "Clear Network Filters", description: "Remove all filters", icon: "🗑️") {
+                    NetworkConfigurationManager.shared.clearNetworkFilters()
+                    networkStatus = "Network filters cleared"
+                },
+                FeatureItem(title: "Custom Configuration", description: "Use custom session config", icon: "⚙️") {
+                    let customConfig = NetworkConfigurationManager.shared.createCustomConfiguration()
+                    NetworkService.shared.configureSession(with: customConfig)
+                    networkStatus = "Custom configuration applied"
+                }
+            ]),
+            
             // Testing & Debugging
             FeatureCategoryData(category: .testing, items: [
                 FeatureItem(title: "Crash Me", description: "Trigger a crash for testing", icon: "💥") {
@@ -222,6 +280,29 @@ struct LuciqFeaturesPage: View {
                     
                     ScrollView {
                         LazyVStack(spacing: 20) {
+                            // Network Status Card
+                            if !networkStatus.isEmpty && networkStatus != "Ready" {
+                                VStack(spacing: 8) {
+                                    Text("Network Status")
+                                        .font(.headline)
+                                    Text(networkStatus)
+                                        .font(.subheadline)
+                                        .multilineTextAlignment(.center)
+                                    
+                                    if isDownloading {
+                                        ProgressView(value: downloadProgress)
+                                            .progressViewStyle(.linear)
+                                            .padding(.horizontal)
+                                        Text("\(Int(downloadProgress * 100))%")
+                                            .font(.caption)
+                                    }
+                                }
+                                .padding()
+                                .background(Color.gray.opacity(0.2))
+                                .cornerRadius(12)
+                                .padding(.horizontal)
+                            }
+                            
                             // Feature Categories
                             ForEach(featureCategories) { categoryData in
                                 FeatureCategoryView(
@@ -264,6 +345,11 @@ struct LuciqFeaturesPage: View {
             }
         } message: {
             Text("Enter the new multi-question survey token. This will be used for multi-question surveys.")
+        }
+        .alert("Network Result", isPresented: $showingNetworkAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(networkStatus)
         }
     }
 }
@@ -337,6 +423,125 @@ private extension LuciqFeaturesPage {
        // Update Configuration
        Configuration.multiQuestionSurveyToken = newToken
        Surveys.showSurvey(withToken: Configuration.multiQuestionSurveyToken)
+   }
+   
+   // MARK: - Network Testing Methods
+   
+   /// Test simple GET request
+   private func testSimpleGetRequest() {
+       networkStatus = "Loading simple GET request..."
+       NetworkService.shared.testSimpleGetRequest { result in
+           DispatchQueue.main.async {
+               switch result {
+               case .success(let data):
+                   networkStatus = "✅ GET request successful!\nReceived \(data.count) characters"
+                   showingNetworkAlert = true
+               case .failure(let error):
+                   networkStatus = "❌ GET request failed: \(error.localizedDescription)"
+                   showingNetworkAlert = true
+               }
+           }
+       }
+   }
+   
+   /// Test GET request with parameters
+   private func testGetRequestWithParams() {
+       networkStatus = "Loading GET request with params..."
+       NetworkService.shared.testGetRequestWithParams { result in
+           DispatchQueue.main.async {
+               switch result {
+               case .success(let data):
+                   networkStatus = "✅ GET with params successful!\nReceived \(data.count) characters"
+                   showingNetworkAlert = true
+               case .failure(let error):
+                   networkStatus = "❌ GET with params failed: \(error.localizedDescription)"
+                   showingNetworkAlert = true
+               }
+           }
+       }
+   }
+   
+   /// Test auto-cancel request: starts download and cancels after 1 second
+   private func testAutoCancelRequest() {
+       isDownloading = true
+       downloadProgress = 0.0
+       networkStatus = "Starting download...\nWill auto-cancel in 1 second"
+       
+       NetworkService.shared.testLargeFileDownload(progressHandler: { progress in
+           DispatchQueue.main.async {
+               self.downloadProgress = progress
+               self.networkStatus = "Downloading... \(Int(progress * 100))%\nCancelling in 1 second"
+           }
+       }, completion: { result in
+           DispatchQueue.main.async {
+               self.isDownloading = false
+               switch result {
+               case .success(let data):
+                   networkStatus = "⚠️ Download completed before cancel\nReceived \(ByteCountFormatter.string(fromByteCount: Int64(data.count), countStyle: .file))"
+                   showingNetworkAlert = true
+               case .failure(let error):
+                   networkStatus = "✅ Request cancelled successfully!\nError: \(error.localizedDescription)"
+                   showingNetworkAlert = true
+               }
+           }
+       })
+       
+       // Auto-cancel after 1 second
+//       DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+           NetworkService.shared.cancelCurrentRequest()
+           self.networkStatus = "⏱️ Cancelling request..."
+//       }
+   }
+   
+   /// Test multiple sequential requests
+   private func testMultipleRequests() {
+       networkStatus = "Loading multiple requests..."
+       NetworkService.shared.testMultipleRequests { result in
+           DispatchQueue.main.async {
+               switch result {
+               case .success(let responses):
+                   networkStatus = "✅ Multiple requests successful!\nCompleted \(responses.count) requests"
+                   showingNetworkAlert = true
+               case .failure(let error):
+                   networkStatus = "❌ Multiple requests failed: \(error.localizedDescription)"
+                   showingNetworkAlert = true
+               }
+           }
+       }
+   }
+   
+   /// Test failed request (404)
+   private func testFailedRequest() {
+       networkStatus = "Testing failed request..."
+       NetworkService.shared.testFailedRequest { result in
+           DispatchQueue.main.async {
+               switch result {
+               case .success(let data):
+                   networkStatus = "✅ Request completed (unexpected success)\nReceived: \(data.prefix(100))..."
+                   showingNetworkAlert = true
+               case .failure(let error):
+                   networkStatus = "✅ Request failed as expected: \(error.localizedDescription)"
+                   showingNetworkAlert = true
+               }
+           }
+       }
+   }
+   
+   /// Test timeout request
+   private func testTimeoutRequest() {
+       networkStatus = "Testing timeout..."
+       NetworkService.shared.testTimeoutRequest { result in
+           DispatchQueue.main.async {
+               switch result {
+               case .success(let data):
+                   networkStatus = "⚠️ Request completed (no timeout)\nReceived: \(data.prefix(100))..."
+                   showingNetworkAlert = true
+               case .failure(let error):
+                   networkStatus = "✅ Timeout occurred: \(error.localizedDescription)"
+                   showingNetworkAlert = true
+               }
+           }
+       }
    }
 }
 

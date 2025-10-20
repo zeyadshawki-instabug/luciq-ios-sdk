@@ -2,7 +2,7 @@
 //  FeatureCategoryView.swift
 //  NewSampleLuciqSwiftUI
 //
-//  Created by zeyad Shawki on 05/10/2025.
+//  Created by Luciq on 05/10/2025.
 //
 
 import Foundation

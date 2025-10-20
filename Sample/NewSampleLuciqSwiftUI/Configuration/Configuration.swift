@@ -25,7 +25,7 @@ struct Configuration {
     
     /// The main Luciq SDK app token
     /// Replace this with your actual app token from the Luciq dashboard
-    static var appToken = "d824b0efb5573e97ac7c03fb03d2d0a3"
+    static var appToken = ""
     
     // MARK: - Survey Tokens
     
